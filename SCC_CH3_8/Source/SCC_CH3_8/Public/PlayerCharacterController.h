@@ -17,6 +17,15 @@ class SCC_CH3_8_API APlayerCharacterController : public APlayerController
 //functions
 public:
 	APlayerCharacterController();
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	UUserWidget* GetHUDWidget() const;
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowGameHUD();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ShowMainMenu(bool bIsStart);
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void StartGame();
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,4 +41,14 @@ public:
 	TObjectPtr<UInputAction> LookAction;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
+	TObjectPtr<UUserWidget> HUDWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> MenuWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Menu")
+	TObjectPtr<UUserWidget> MenuWidgetInstance;
 };

@@ -41,4 +41,5 @@ public:
 
 private:
 	FTimerHandle LevelTimerHandle;
+	FTimerHandle HUDUpdateTimerHandle;
 };

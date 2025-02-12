@@ -1,14 +1,20 @@
 #include "PlayerCharacterController.h"
 
+#include "DefaultGameState.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
-
+#include "Blueprint/UserWidget.h"
 
 APlayerCharacterController::APlayerCharacterController()
 	:InputMappingContext(nullptr)
 	, MoveAction(nullptr)
 	, LookAction(nullptr)
 	, JumpAction(nullptr)
+	, HUDWidgetClass(nullptr)
+	, HUDWidgetInstance(nullptr)
+	, MenuWidgetClass(nullptr)
+	, MenuWidgetInstance(nullptr)
 {
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC_Default(TEXT("/Game/Inputs/IMC_Default.IMC_Default"));
 	if (IMC_Default.Succeeded())
@@ -33,6 +39,29 @@ APlayerCharacterController::APlayerCharacterController()
 	{
 		JumpAction = IA_Jump.Object;
 	}
+	
+	static ConstructorHelpers::FClassFinder<UUserWidget>HUDWidget(TEXT("/Game/UI/WBP_HUD.WBP_HUD_C"));
+	if (HUDWidget.Succeeded())
+	{
+		HUDWidgetClass = HUDWidget.Class;
+	}
+}
+
+UUserWidget* APlayerCharacterController::GetHUDWidget() const
+{
+	return HUDWidgetInstance;
+}
+
+void APlayerCharacterController::ShowGameHUD()
+{
+}
+
+void APlayerCharacterController::ShowMainMenu(bool bIsStart)
+{
+}
+
+void APlayerCharacterController::StartGame()
+{
 }
 
 
@@ -49,5 +78,20 @@ void APlayerCharacterController::BeginPlay()
 				Subsystem->AddMappingContext(InputMappingContext, 0);
 			}
 		}
+	}
+
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+		}
+	}
+
+	ADefaultGameState* DefaultGameState = GetWorld() ? GetWorld()->GetGameState<ADefaultGameState>() : nullptr;
+	if (DefaultGameState)
+	{
+		DefaultGameState->UpdateHUD();
 	}
 }

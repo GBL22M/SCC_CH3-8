@@ -83,7 +83,6 @@ void AMineItem::Explode()
 			APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Activator);
 			if (PlayerCharacter)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("launch!")));
 				FVector LaunchVelocity = FVector(-LaunchVector * MinePower);
 				PlayerCharacter->LaunchCharacter(LaunchVelocity, true, true);										
 			}
@@ -95,8 +94,6 @@ void AMineItem::Explode()
 
 void AMineItem::Vibrate()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("vibrate!")));
-
 	float Offset = FMath::Sin(TimeElapsed * VibrationFrequency * 2.0f * PI) * VibrationAmplitude;
 	FVector NewLocation = OriginLocation + FVector(0, 0, Offset);
 	SetActorLocation(NewLocation);

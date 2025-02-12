@@ -1,14 +1,17 @@
 #include "DefaultGameState.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "PlayerCharacterController.h"
 #include "DefaultGameInstance.h"
 #include "ItemSpawnVolume.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
+#include "Blueprint/UserWidget.h"
 
 ADefaultGameState::ADefaultGameState()
 	:TotalScore(0)
-	,LevelDuration(30.f)
+	,LevelDuration(10.f)
 	,CurrentLevelIndex(0)
 	,MaxLevelIndex(3)
 {
@@ -24,21 +27,39 @@ int32 ADefaultGameState::GetScore() const
 
 void ADefaultGameState::AddScore(int32 Amount)
 {
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance);
+		if (DefaultGameInstance)
+		{
+			DefaultGameInstance->AddTotalScore(Amount);
+		}
+	}
 	TotalScore += Amount;
 }
 
 void ADefaultGameState::OnGameOver()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("END GAME")));
+	UpdateHUD();
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("END GAME")));
 }
 
 void ADefaultGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UpdateHUD();
 	StartLevel();
 
 	//HUD Timer
+	GetWorldTimerManager().SetTimer
+	(
+		HUDUpdateTimerHandle
+		,this
+		,&ADefaultGameState::UpdateHUD
+		,0.1f
+		,true
+	);
 }
 
 void ADefaultGameState::StartLevel()
@@ -46,12 +67,9 @@ void ADefaultGameState::StartLevel()
 	//game instance - level
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("GameInstance OK")));
-
 		UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance);
 		if (DefaultGameInstance)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("start level: %d"), DefaultGameInstance->CurrentLevel));
 			CurrentLevelIndex = DefaultGameInstance->CurrentLevel;
 		}
 	}
@@ -82,12 +100,13 @@ void ADefaultGameState::StartLevel()
 		, LevelDuration
 		, false
 	);
+
+	UpdateHUD();
 }
 
 void ADefaultGameState::OnLevelTimeUp()
 {
 	EndLevel();
-	//OnGameOver();
 }
 
 void ADefaultGameState::EndLevel()
@@ -123,4 +142,40 @@ void ADefaultGameState::EndLevel()
 
 void ADefaultGameState::UpdateHUD()
 {
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (APlayerCharacterController* PlayerCharacterController = Cast<APlayerCharacterController>(PlayerController))
+		{
+			if (UUserWidget* HUDWidget = PlayerCharacterController->GetHUDWidget())
+			{
+				//Timer Text
+				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Time"))))
+				{
+					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
+					TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time : %.1f"),RemainingTime)));
+				}
+
+				if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Score"))))
+				{
+					if (UGameInstance* GameInstance = GetGameInstance())
+					{
+						if (UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance))
+						{
+							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score : %d"), DefaultGameInstance->TotalScore)));
+						}
+					}
+				}
+				if (UTextBlock* LevelText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
+				{
+					if (UGameInstance* GameInstance = GetGameInstance())
+					{
+						if (UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance))
+						{
+							LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level : %d"), DefaultGameInstance->CurrentLevel + 1)));
+						}
+					}
+				}
+			}
+		}
+	}
 }
