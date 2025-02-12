@@ -1,20 +1,24 @@
 #include "MineItem.h"
 #include "PlayerCharacter.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/InterpToMovementComponent.h"
 
 AMineItem::AMineItem()
-	:MinePower(1000.f)
-	,ExplosionDelay(2.f)
-	, TimeElapsed(0.f)
-	, VibrationAmplitude(10.f)
-	, VibrationFrequency(5.f)
+	:ExplosionDelay(2.f)
+	,OriginLocation(FVector::ZeroVector)
+	,MinePower(1000.f)
+	,TimeElapsed(0.f)
+	,VibrationAmplitude(10.f)
+	,VibrationFrequency(5.f)
+	,bFirstOverlap(false)
+	,BoxCollisionWidth(100.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	ExplosionCollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("Explosion Collision"));
-	ExplosionCollisionComp->InitSphereRadius(300);
+	ExplosionCollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Explosion Collision"));
+	ExplosionCollisionComp->InitBoxExtent(FVector(BoxCollisionWidth, BoxCollisionWidth, BoxCollisionWidth/3));
 	ExplosionCollisionComp->SetCollisionProfileName(TEXT("OverlapAllDynamics"));
 	ExplosionCollisionComp->SetupAttachment(SceneComp);
 
@@ -35,15 +39,27 @@ void AMineItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TimeElapsed += DeltaTime;
-	float Offset = FMath::Sin(TimeElapsed * VibrationFrequency * 2.0f * PI) * VibrationAmplitude;
-	FVector NewLocation = OriginLocation + FVector(0, 0, Offset);
-	SetActorLocation(NewLocation);
+
+	if(bFirstOverlap)
+		Vibrate();
 }
 
 void AMineItem::ActivateItem(AActor* Activator)
 {
-	Super::ActivateItem(Activator);
-	 
+	Super::ActivateItem(Activator);	 
+	
+	if (bFirstOverlap)
+		return;
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Activator);
+	if (PlayerCharacter)
+	{
+		LaunchVector = PlayerCharacter->GetActorForwardVector();
+		LaunchVector.Normalize();
+	}
+
+	bFirstOverlap = true;
+
 	GetWorld()->GetTimerManager().SetTimer
 	(
 		ExplosionTimerHandle
@@ -57,6 +73,7 @@ void AMineItem::ActivateItem(AActor* Activator)
 void AMineItem::Explode()
 {
 	TArray<AActor*> OverlappingActors;
+
 	ExplosionCollisionComp->GetOverlappingActors(OverlappingActors);
 
 	for (AActor* Activator : OverlappingActors)
@@ -67,11 +84,20 @@ void AMineItem::Explode()
 			if (PlayerCharacter)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("launch!")));
-				FVector LaunchVelocity = FVector(-PlayerCharacter->GetActorForwardVector() * MinePower);
+				FVector LaunchVelocity = FVector(-LaunchVector * MinePower);
 				PlayerCharacter->LaunchCharacter(LaunchVelocity, true, true);										
 			}
 
 		}
 	}
 	DestroyItem();
+}
+
+void AMineItem::Vibrate()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("vibrate!")));
+
+	float Offset = FMath::Sin(TimeElapsed * VibrationFrequency * 2.0f * PI) * VibrationAmplitude;
+	FVector NewLocation = OriginLocation + FVector(0, 0, Offset);
+	SetActorLocation(NewLocation);
 }

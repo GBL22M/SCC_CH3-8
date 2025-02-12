@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ItemSpawnRow.h"
 #include "ItemSpawnVolume.generated.h"
+
+class UBoxComponent;
 
 UCLASS()
 class SCC_CH3_8_API AItemSpawnVolume : public AActor
@@ -12,15 +13,25 @@ class SCC_CH3_8_API AItemSpawnVolume : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AItemSpawnVolume();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	AActor* SpawnRandomItem();
 
+private:
+	AActor* SpawnItem(TSubclassOf<AActor> ItemClass);
+	FVector GetRandomPointInVolume() const;
+	FItemSpawnRow* GetRandomItem() const;
+
+//Variables
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning|Components")
+	TObjectPtr<USceneComponent> Scene;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning|Components")
+	TObjectPtr<UBoxComponent> SpawningBox;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning|Components")
+	TObjectPtr<UDataTable> ItemDataTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawing|Components")
+	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
 
 };

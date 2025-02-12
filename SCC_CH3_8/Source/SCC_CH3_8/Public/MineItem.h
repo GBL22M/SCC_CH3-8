@@ -7,6 +7,7 @@
 #include "MineItem.generated.h"
 
 class UInterpToMovementComponent;
+class UBoxComponent;
 
 UCLASS()
 class SCC_CH3_8_API AMineItem : public ABaseItem
@@ -21,25 +22,25 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void ActivateItem(AActor* Activator) override;
 	void Explode();
+	void Vibrate();
 
 //variables
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TObjectPtr<UBoxComponent> ExplosionCollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Component")
-	TObjectPtr<USphereComponent> ExplosionCollisionComp;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	float MinePower; //캐릭터를 밀어내는 힘
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	//TArray<FVector>	Positions;
-
+	float BoxCollisionWidth;
 
 private:
 	FTimerHandle ExplosionTimerHandle;
-	float ExplosionDelay;
-	//UInterpToMovementComponent* InterpMovementComp;
+	float ExplosionDelay;	
 	FVector OriginLocation;
+	FVector LaunchVector;
+
+	float MinePower; //캐릭터를 밀어내는 힘
 	float TimeElapsed;
 	float VibrationAmplitude;
 	float VibrationFrequency;
+
+	bool bFirstOverlap;
 };
