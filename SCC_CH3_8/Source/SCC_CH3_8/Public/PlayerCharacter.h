@@ -17,9 +17,10 @@ class SCC_CH3_8_API APlayerCharacter : public ACharacter
 public:
 	APlayerCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void ReverseMove();
+	void RestoreMove();
 
 protected:
-
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
 	UFUNCTION()
@@ -37,6 +38,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-private:
 
+private:
+	bool bIsReverseMove;
+	FTimerHandle ReverseMoveTimerHandle;
+	float ReverseMoveDelayTime;
 };

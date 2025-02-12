@@ -156,7 +156,6 @@ void APlayerCharacterController::PlayBarAnimation()
 	UFunction* PlayBarAnim = HUDWidgetInstance->FindFunction(FName("ProgressBarAnimation"));
 	if (PlayBarAnim)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("animation")));
 		HUDWidgetInstance->ProcessEvent(PlayBarAnim, nullptr);
 	}
 }

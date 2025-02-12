@@ -1,4 +1,5 @@
 #include "PlayerCharacter.h"
+
 #include "PlayerCharacterController.h"
 
 #include "Camera/CameraComponent.h"
@@ -8,6 +9,8 @@
 
 
 APlayerCharacter::APlayerCharacter()
+	:bIsReverseMove(false)
+	,ReverseMoveDelayTime(2.f)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -84,13 +87,37 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+void APlayerCharacter::ReverseMove()
+{
+	bIsReverseMove = true;
+
+	GetWorldTimerManager().SetTimer
+	(
+		ReverseMoveTimerHandle
+		,this
+		,&APlayerCharacter::RestoreMove
+		,ReverseMoveDelayTime
+		,false
+	);
+}
+
+void APlayerCharacter::RestoreMove()
+{
+	bIsReverseMove = false;
+}
+
 void APlayerCharacter::Move(const FInputActionValue& value)
 {
 	if (!Controller)
 		return;
+	FVector2D MoveInput = value.Get<FVector2D>();
 
-	const FVector2D MoveInput = value.Get<FVector2D>();
-
+	if (bIsReverseMove)
+	{
+		MoveInput.X *= -1;
+		MoveInput.Y *= -1;
+	}
+	
 	if (!FMath::IsNearlyZero(MoveInput.X))
 	{
 		AddMovementInput(GetActorForwardVector(), MoveInput.X);

@@ -6,7 +6,6 @@
 #include "BaseItem.h"
 #include "MineItem.generated.h"
 
-class UInterpToMovementComponent;
 class UBoxComponent;
 
 UCLASS()
