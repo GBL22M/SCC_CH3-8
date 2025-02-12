@@ -8,7 +8,7 @@
 AMineItem::AMineItem()
 	:ExplosionDelay(2.f)
 	,OriginLocation(FVector::ZeroVector)
-	,MinePower(1000.f)
+	,MinePower(2000.f)
 	,TimeElapsed(0.f)
 	,VibrationAmplitude(10.f)
 	,VibrationFrequency(5.f)

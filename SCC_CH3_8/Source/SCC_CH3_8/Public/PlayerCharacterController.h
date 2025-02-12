@@ -23,9 +23,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
 	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void ShowMainMenu(bool bIsStart);
+	void ShowMainMenu(bool bIsReStart);
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void PlayBarAnimation();
 
 protected:
 	virtual void BeginPlay() override;

@@ -7,6 +7,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 #include "Blueprint/UserWidget.h"
 
 ADefaultGameState::ADefaultGameState()
@@ -14,6 +15,7 @@ ADefaultGameState::ADefaultGameState()
 	,LevelDuration(10.f)
 	,CurrentLevelIndex(0)
 	,MaxLevelIndex(3)
+	,bPlayBefore(false)
 {
 	LevelMapNames.Push(FName("Level1"));
 	LevelMapNames.Push(FName("Level2"));
@@ -40,8 +42,14 @@ void ADefaultGameState::AddScore(int32 Amount)
 
 void ADefaultGameState::OnGameOver()
 {
-	UpdateHUD();
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("END GAME")));
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (APlayerCharacterController* PlayerCharacterController = Cast<APlayerCharacterController>(PlayerController))
+		{
+			PlayerCharacterController->ShowMainMenu(true);
+			PlayerCharacterController->SetPause(true);
+		}
+	}
 }
 
 void ADefaultGameState::BeginPlay()
@@ -64,6 +72,13 @@ void ADefaultGameState::BeginPlay()
 
 void ADefaultGameState::StartLevel()
 {
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (APlayerCharacterController* PlayerCharacterController = Cast<APlayerCharacterController>(PlayerController))
+		{
+			PlayerCharacterController->ShowGameHUD();
+		}
+	}
 	//game instance - level
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
@@ -119,7 +134,6 @@ void ADefaultGameState::EndLevel()
 		UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance);
 		if (DefaultGameInstance)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("end level: %d"), DefaultGameInstance->CurrentLevel));
 			DefaultGameInstance->CurrentLevel = CurrentLevelIndex;
 		}
 	}
@@ -151,7 +165,7 @@ void ADefaultGameState::UpdateHUD()
 				//Timer Text
 				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Time"))))
 				{
-					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
+					RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
 					TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time : %.1f"),RemainingTime)));
 				}
 
@@ -175,6 +189,18 @@ void ADefaultGameState::UpdateHUD()
 						}
 					}
 				}
+				if (UProgressBar* ProgressBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("TimeBar"))))
+				{			
+					RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
+					float value = RemainingTime / LevelDuration;
+					ProgressBar->SetPercent(value);
+					
+					if (!bPlayBefore && value > 0.001f && value < 0.3f)
+					{
+						PlayerCharacterController->PlayBarAnimation();
+						bPlayBefore = true;
+					}
+				}				
 			}
 		}
 	}

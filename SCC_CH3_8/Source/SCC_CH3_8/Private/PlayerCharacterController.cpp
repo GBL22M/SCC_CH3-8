@@ -1,10 +1,13 @@
 #include "PlayerCharacterController.h"
 
 #include "DefaultGameState.h"
+#include "DefaultGameInstance.h"
 
+#include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
-#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacterController::APlayerCharacterController()
 	:InputMappingContext(nullptr)
@@ -45,6 +48,12 @@ APlayerCharacterController::APlayerCharacterController()
 	{
 		HUDWidgetClass = HUDWidget.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>MenuWidget(TEXT("/Game/UI/WBP_MainMenu.WBP_MainMenu_C"));
+	if (MenuWidget.Succeeded())
+	{
+		MenuWidgetClass = MenuWidget.Class;
+	}
 }
 
 UUserWidget* APlayerCharacterController::GetHUDWidget() const
@@ -54,14 +63,102 @@ UUserWidget* APlayerCharacterController::GetHUDWidget() const
 
 void APlayerCharacterController::ShowGameHUD()
 {
+	//HUD 있으면 없애기
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
+
+	//MainMenu 있으면 없애기
+	if (MenuWidgetInstance)
+	{
+		MenuWidgetInstance->RemoveFromParent();
+		MenuWidgetInstance = nullptr;
+	}
+
+	//HUD UI 생성
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+			
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+
+			ADefaultGameState* DefaultGameState = GetWorld() ? GetWorld()->GetGameState<ADefaultGameState>() : nullptr;
+			if (DefaultGameState)
+			{
+				DefaultGameState->UpdateHUD();
+			}
+		}
+	}
 }
 
-void APlayerCharacterController::ShowMainMenu(bool bIsStart)
+void APlayerCharacterController::ShowMainMenu(bool bIsReStart)
 {
+	//MainMenu 켤때 HUD 있으면 없애기
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
+
+	//MainMenu 켤때 MainMenu 있으면 없애기
+	if (MenuWidgetInstance)
+	{
+		MenuWidgetInstance->RemoveFromParent();
+		MenuWidgetInstance = nullptr;
+	}
+
+	//Menu UI 생성
+	if (MenuWidgetClass)
+	{
+		MenuWidgetInstance = CreateWidget<UUserWidget>(this, MenuWidgetClass);
+		if (MenuWidgetInstance)
+		{
+			MenuWidgetInstance->AddToViewport();
+
+			//게임 조작 불가능하게 처리
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+		}
+
+		if (UTextBlock* ButtonText = Cast<UTextBlock>(MenuWidgetInstance->GetWidgetFromName(TEXT("StartButtonText"))))
+		{
+			if (bIsReStart)
+			{
+				ButtonText->SetText(FText::FromString(TEXT("Restart")));
+			}
+			else
+			{
+				ButtonText->SetText(FText::FromString(TEXT("Start")));
+			}
+		}
+	}
 }
 
 void APlayerCharacterController::StartGame()
 {
+	if (UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(UGameplayStatics::GetGameInstance(this)))
+	{
+		DefaultGameInstance->CurrentLevel = 0;
+		DefaultGameInstance->TotalScore = 0;
+	}
+	UGameplayStatics::OpenLevel(GetWorld(), FName("Level1"));
+	SetPause(false);
+}
+
+void APlayerCharacterController::PlayBarAnimation()
+{
+	UFunction* PlayBarAnim = HUDWidgetInstance->FindFunction(FName("ProgressBarAnimation"));
+	if (PlayBarAnim)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("animation")));
+		HUDWidgetInstance->ProcessEvent(PlayBarAnim, nullptr);
+	}
 }
 
 
@@ -79,19 +176,11 @@ void APlayerCharacterController::BeginPlay()
 			}
 		}
 	}
-
-	if (HUDWidgetClass)
+	
+	//Game Start
+	FString CurrentMapName = GetWorld()->GetMapName();
+	if (CurrentMapName.Contains("MenuLevel"))
 	{
-		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-		if (HUDWidgetInstance)
-		{
-			HUDWidgetInstance->AddToViewport();
-		}
-	}
-
-	ADefaultGameState* DefaultGameState = GetWorld() ? GetWorld()->GetGameState<ADefaultGameState>() : nullptr;
-	if (DefaultGameState)
-	{
-		DefaultGameState->UpdateHUD();
+		ShowMainMenu(false);
 	}
 }

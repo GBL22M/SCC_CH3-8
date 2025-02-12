@@ -38,8 +38,11 @@ public:
 	int32 MaxLevelIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level");
 	TArray<FName> LevelMapNames;
+	bool bPlayBefore;
 
 private:
 	FTimerHandle LevelTimerHandle;
 	FTimerHandle HUDUpdateTimerHandle;
+
+	float RemainingTime;
 };
