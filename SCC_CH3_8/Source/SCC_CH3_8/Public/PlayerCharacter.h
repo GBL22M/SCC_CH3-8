@@ -7,6 +7,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 struct FInputActionValue;
+class UWidgetComponent;
 
 UCLASS()
 class SCC_CH3_8_API APlayerCharacter : public ACharacter
@@ -19,6 +20,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void ReverseMove();
 	void RestoreMove();
+	void UpdateOverheadWidget();
 
 protected:
 	UFUNCTION()
@@ -37,7 +39,8 @@ public:
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> CameraComp;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> OverheadWidget;
 
 private:
 	bool bIsReverseMove;

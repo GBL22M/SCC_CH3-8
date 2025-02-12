@@ -3,6 +3,8 @@
 #include "PlayerCharacterController.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/Image.h"
+#include "Components/WidgetComponent.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,6 +23,19 @@ APlayerCharacter::APlayerCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
+
+	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
+	OverheadWidget->SetupAttachment(GetMesh());
+	OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> OverHeadWidgetClass(TEXT("/Game/UI/WBP_Item.WBP_Item_C"));
+	if (OverHeadWidgetClass.Succeeded())
+	{
+		OverheadWidget->SetWidgetClass(OverHeadWidgetClass.Class);
+	}
+	OverheadWidget->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	OverheadWidget->SetRelativeLocation(FVector(0.f, 0.f, 180.f));
+	OverheadWidget->SetDrawSize(FVector2D(100.f, 100.f));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>SkeletalMeshAsset(TEXT("/Game/Resources/Characters/Meshes/SKM_Manny.SKM_Manny"));
 	if (SkeletalMeshAsset.Succeeded())
@@ -90,6 +105,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::ReverseMove()
 {
 	bIsReverseMove = true;
+	UpdateOverheadWidget();
 
 	GetWorldTimerManager().SetTimer
 	(
@@ -104,6 +120,37 @@ void APlayerCharacter::ReverseMove()
 void APlayerCharacter::RestoreMove()
 {
 	bIsReverseMove = false;
+
+	if (!OverheadWidget)
+		return;
+
+	UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+	if (!OverheadWidgetInstance)
+		return;
+
+	if (UImage* Image = Cast<UImage>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadWidget"))))
+	{
+		Image->SetOpacity(0.f);
+	}
+}
+
+void APlayerCharacter::UpdateOverheadWidget()
+{
+	if (!OverheadWidget)
+		return;
+
+	UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+	if (!OverheadWidgetInstance) 
+		return;
+
+	if (UImage* Image = Cast<UImage>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadWidget"))))
+	{
+		Image->SetOpacity(1.f);
+	}		
+	/*if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHP"))))
+	{
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), Health, MaxHealth)));
+	}*/
 }
 
 void APlayerCharacter::Move(const FInputActionValue& value)
