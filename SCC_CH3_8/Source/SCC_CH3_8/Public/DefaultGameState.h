@@ -46,4 +46,5 @@ private:
 	FTimerHandle HUDUpdateTimerHandle;
 
 	float RemainingTime;
+	const int32 MaxItemToSpawn = 4;
 };

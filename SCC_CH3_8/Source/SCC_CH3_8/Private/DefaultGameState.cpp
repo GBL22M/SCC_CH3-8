@@ -37,6 +37,13 @@ void ADefaultGameState::AddScore(int32 Amount)
 			DefaultGameInstance->AddTotalScore(Amount);
 		}
 	}
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (APlayerCharacterController* PlayerCharacterController = Cast<APlayerCharacterController>(PlayerController))
+		{
+			PlayerCharacterController->PlayScoreTextAnimation();
+		}
+	}
 	TotalScore += Amount;
 }
 
@@ -93,14 +100,14 @@ void ADefaultGameState::StartLevel()
 	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnVolume::StaticClass(), FoundVolumes);
 
-	const int32 ItemToSpawn = 3;
+	//int32 ItemToSpawn = FMath::RandRange(1, MaxItemToSpawn);
 
 	for (int32 i = 0; i < FoundVolumes.Num(); ++i)
 	{
 		AItemSpawnVolume* SpawnVolume = Cast<AItemSpawnVolume>(FoundVolumes[i]);
 		if (SpawnVolume)
 		{
-			for (int32 j = 0; j < ItemToSpawn; ++j)
+			for (int32 j = 0; j < MaxItemToSpawn; ++j)
 			{
 				AActor* SpawnedActor = SpawnVolume->SpawnRandomItem();
 			}
@@ -170,12 +177,12 @@ void ADefaultGameState::UpdateHUD()
 				}
 
 				if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Score"))))
-				{
+				{					
 					if (UGameInstance* GameInstance = GetGameInstance())
 					{
 						if (UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GameInstance))
 						{
-							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score : %d"), DefaultGameInstance->TotalScore)));
+							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("%d"), DefaultGameInstance->TotalScore)));
 						}
 					}
 				}

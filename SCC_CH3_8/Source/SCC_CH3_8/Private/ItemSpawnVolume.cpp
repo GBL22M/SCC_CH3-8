@@ -39,8 +39,6 @@ AActor* AItemSpawnVolume::SpawnRandomItem()
 	{
 		if (UClass* ActualClass = SelectedRow->ItemClass.Get())
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("spawn")));
-
 			return SpawnItem(ActualClass);
 		}
 	}

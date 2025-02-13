@@ -28,10 +28,11 @@ public:
 	void StartGame();
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void PlayBarAnimation();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void PlayScoreTextAnimation();
 
 protected:
 	virtual void BeginPlay() override;
-
 
 //variables
 public:

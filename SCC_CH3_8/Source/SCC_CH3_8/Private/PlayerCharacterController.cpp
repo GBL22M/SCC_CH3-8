@@ -169,6 +169,15 @@ void APlayerCharacterController::PlayBarAnimation()
 	}
 }
 
+void APlayerCharacterController::PlayScoreTextAnimation()
+{
+	UFunction* PlayScoreTextAnim = HUDWidgetInstance->FindFunction(FName("ScoreTextAnimation"));
+	if (PlayScoreTextAnim)
+	{
+		HUDWidgetInstance->ProcessEvent(PlayScoreTextAnim, nullptr);
+	}
+}
+
 
 void APlayerCharacterController::BeginPlay()
 {
