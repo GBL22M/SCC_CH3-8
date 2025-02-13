@@ -19,4 +19,6 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	int32 PointValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Component")
+	TArray<TObjectPtr<USoundBase>> PickupSounds;
 };

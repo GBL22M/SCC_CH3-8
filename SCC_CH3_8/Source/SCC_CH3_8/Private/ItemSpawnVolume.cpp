@@ -13,7 +13,7 @@ AItemSpawnVolume::AItemSpawnVolume()
 	SpawningBox->SetupAttachment(RootComponent);
 
 	SpawningBox->SetRelativeLocation(FVector(0.f, -120.f, 70.f));
-	SpawningBox->InitBoxExtent(FVector(200.f, 100.f, 32.f));
+	SpawningBox->InitBoxExtent(FVector(200.f, 100.f, 5.f));
 	
 	//레벨 마다 다른 Data Table을 적용하도록
 	static ConstructorHelpers::FObjectFinder<UDataTable> DataTableAsset(TEXT("/Game/Data/DT_Level1.DT_Level1"));

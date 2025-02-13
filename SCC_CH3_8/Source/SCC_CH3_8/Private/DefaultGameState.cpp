@@ -12,7 +12,7 @@
 
 ADefaultGameState::ADefaultGameState()
 	:TotalScore(0)
-	,LevelDuration(10.f)
+	,LevelDuration(30.f)
 	,CurrentLevelIndex(0)
 	,MaxLevelIndex(3)
 	,bPlayBefore(false)

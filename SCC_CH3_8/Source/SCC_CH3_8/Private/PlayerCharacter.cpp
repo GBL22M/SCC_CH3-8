@@ -43,6 +43,14 @@ APlayerCharacter::APlayerCharacter()
 		GetMesh()->SetSkeletalMesh(SkeletalMeshAsset.Object);
 	}
 
+	static ConstructorHelpers::FClassFinder<UAnimInstance>AnimInstanceClass(TEXT("/Game/Animation/ABP_PlayerCharacter.ABP_PlayerCharacter_C"));
+	if (AnimInstanceClass.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstanceClass.Class);
+	}
+
+
+	//value setting
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 

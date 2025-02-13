@@ -131,6 +131,15 @@ void APlayerCharacterController::ShowMainMenu(bool bIsReStart)
 			if (bIsReStart)
 			{
 				ButtonText->SetText(FText::FromString(TEXT("Restart")));
+				if (UTextBlock* ScoreText = Cast<UTextBlock>(MenuWidgetInstance->GetWidgetFromName(TEXT("TotalScoreText"))))
+				{
+					if (UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(UGameplayStatics::GetGameInstance(this)))
+					{
+						ScoreText->SetVisibility(ESlateVisibility::Visible);
+						ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Total Score : %d"), DefaultGameInstance->TotalScore)));						
+					}
+				}
+
 			}
 			else
 			{
