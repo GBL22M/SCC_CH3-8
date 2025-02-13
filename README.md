@@ -1,7 +1,7 @@
 # SCC_CH3-8
 ## UE5 CPP - 점프 게임 (ui 구현)
 ### 1. 과제 개요
-#### 필수 과제
+#### 1-1. 필수 과제
 * 멀티웨이브 구현
   * 3 번의 레벨 전환
   * 레벨이 증가할수록 스폰되는 아이템 개수 변경
@@ -9,7 +9,7 @@
   * HUD
     * 점수, 시간, 체력 등의 정보 출력
     * 메인 메뉴, 게임 오버 메뉴
-#### 도전 과제
+#### 1-2. 도전 과제
 * 아이템 상호작용
   * 부정적 아이템 추가
   * 디버프가 풀리는지 ui를 통해 보여주기
@@ -20,8 +20,8 @@
   * 3D 위젯 구현
 
 ### 2. 구현 내용
-#### 필수 과제
-##### 1. 멀티웨이브 구현
+#### 2-1. 필수 과제
+#### 2-1-1. 멀티웨이브 구현
   * 3개의 레벨 구현<div/>
     * 레벨1의 모습<div/>
     ![image](https://github.com/user-attachments/assets/6377fd60-2fdc-4ca7-a127-0914a65b9bbd)
@@ -71,7 +71,7 @@ FItemSpawnRow* AItemSpawnVolume::GetRandomItem() const
 	return nullptr;
 }
 ```
-##### 2. HUD & UI 리뉴얼
+#### 2-1-2. HUD & UI 리뉴얼
 * HUD
   * 점수, 레벨, 남은 시간 출력 (구현 내용 정리글: https://gbleem.tistory.com/78)<div/>
   ![image](https://github.com/user-attachments/assets/6275d3ca-7b0f-4dae-840e-a3097a6c56de)
@@ -79,8 +79,8 @@ FItemSpawnRow* AItemSpawnVolume::GetRandomItem() const
   * 게임 시작 및 게임 재시작 버튼 구현 (구현 내용 정리글: https://gbleem.tistory.com/79) <div/>
     ![image](https://github.com/user-attachments/assets/8363ab05-443c-4f85-b7cc-1608c5cc1749)
 
-#### 도전 과제
-##### 1. 아이템 상호작용 추가
+#### 2-2. 도전 과제
+#### 2-2-1. 아이템 상호작용 추가
 * **디버프 아이템 1: 캐릭터를 뒤로 밀치는 아이템**
   * 캐릭터가 해당 아이템에 닿은 후, 범위안에 있었다면 아래의 함수를 실행하는 로직
     ```
@@ -126,11 +126,15 @@ FItemSpawnRow* AItemSpawnVolume::GetRandomItem() const
  * 추가적으로 3D UI를 통해 캐릭터의 상태이상 효과 출력
 ![ue 디버프2](https://github.com/user-attachments/assets/3c7e1380-e6cb-44a3-bc9d-154cd1fbfd53)
 
-##### 2. 레벨 난이도 설정
+#### 2-2-2. 레벨 난이도 설정
 * 레벨별로 다른 Data Table을 통한 난이도 설정
   
-##### 3. 고급 UI
+#### 2-2-3. 고급 UI
 * UI 애니메이션 (구현 내용 정리 글: https://gbleem.tistory.com/80)
   * 타이머를 bar형태의 UI로 구현 후, 남은 시간이 30% 보다 낮아지면 UI 애니메이션 실행
   * 점수를 획득할 때 마다 점수 UI의 애니메이션 실행
 ![ue 고급ui](https://github.com/user-attachments/assets/a2ade266-1ec7-4da2-ab49-937db7ff78c3)
+
+### 3. 시연 영상
+https://drive.google.com/file/d/1vOvl1xFOmHykFINLXPCbw9_-5CGGmLi_/view?usp=drive_link
+
